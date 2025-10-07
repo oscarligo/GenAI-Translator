@@ -12,7 +12,11 @@ object ChatContract {
         val messages: List<Message> = emptyList(),
         val inputText: String = "",
         val selectedImageUri: String? = null,
-        val error: String? = null
+        val error: String? = null,
+        // Nuevo: idioma objetivo de esta conversación
+        val targetLang: String = "en",
+        // Nuevo: resultado estructurado de la traducción
+        val translationResult: com.example.translator.data.TranslationResult? = null
     ) : UiState
 
     sealed interface Event : UiEvent {
@@ -22,6 +26,8 @@ object ChatContract {
         data class PickImage(val uri: String?) : Event
         data object SendImage : Event
         data object ClearImage : Event
+        // Nuevo: cambiar el idioma objetivo
+        data class ChangeTargetLanguage(val lang: String) : Event
     }
 
     sealed interface Effect : UiEffect {
@@ -29,4 +35,3 @@ object ChatContract {
         data class ShowSnack(val message: String) : Effect
     }
 }
-

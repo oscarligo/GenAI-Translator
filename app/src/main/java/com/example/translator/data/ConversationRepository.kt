@@ -13,4 +13,10 @@ interface ConversationRepository {
         text: String? = null,
         imageUri: String? = null
     )
+    // Nuevo: observar una conversación específica
+    fun getConversationFlow(conversationId: String): Flow<Conversation?>
+    // Nuevo: actualizar el idioma objetivo de una conversación
+    suspend fun setTargetLanguage(conversationId: String, lang: String)
+    // Nuevo: agregar mensaje del asistente
+    suspend fun addAssistantMessage(conversationId: String, text: String)
 }

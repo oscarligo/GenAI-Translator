@@ -40,4 +40,27 @@ class InMemoryConversationRepository : ConversationRepository {
             if (c.id == conversationId) c.copy(messageCount = c.messageCount + 1, lastUpdated = System.currentTimeMillis()) else c
         }.sortedByDescending { it.lastUpdated }
     }
+
+    override fun getConversationFlow(conversationId: String): Flow<Conversation?> =
+        conversationsFlow.map { list -> list.find { it.id == conversationId } }
+
+    override suspend fun setTargetLanguage(conversationId: String, lang: String) {
+        conversationsFlow.value = conversationsFlow.value.map { c ->
+            if (c.id == conversationId) c.copy(targetLang = lang, lastUpdated = System.currentTimeMillis()) else c
+        }.sortedByDescending { it.lastUpdated }
+    }
+
+    override suspend fun addAssistantMessage(conversationId: String, text: String) {
+        val listFlow = messagesMap.getOrPut(conversationId) { MutableStateFlow(emptyList()) }
+        val message = Message(
+            conversationId = conversationId,
+            type = MessageType.TEXT,
+            role = MessageRole.ASSISTANT,
+            text = text
+        )
+        listFlow.value = listFlow.value + message
+        conversationsFlow.value = conversationsFlow.value.map { c ->
+            if (c.id == conversationId) c.copy(messageCount = c.messageCount + 1, lastUpdated = System.currentTimeMillis()) else c
+        }.sortedByDescending { it.lastUpdated }
+    }
 }

@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.translator.di.AppGraph
 import com.example.translator.domain.model.Conversation
+import com.example.translator.ui.common.getLanguageOrDefault
 import kotlinx.coroutines.launch
 
 @Composable
@@ -80,7 +81,11 @@ private fun ConversationList(conversations: List<Conversation>, onOpen: (String)
                 modifier = Modifier.fillMaxWidth().clickable { onOpen(conv.id) }
             ) {
                 Column(Modifier.padding(16.dp)) {
-                    Text(conv.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(conv.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                        val lang = getLanguageOrDefault(conv.targetLang)
+                        AssistChip(onClick = {}, enabled = false, label = { Text(text = "${lang.flag} ${lang.code.uppercase()}") })
+                    }
                     Spacer(Modifier.height(4.dp))
                     Text("${conv.messageCount} mensajes", style = MaterialTheme.typography.bodyMedium)
                 }
@@ -88,4 +93,3 @@ private fun ConversationList(conversations: List<Conversation>, onOpen: (String)
         }
     }
 }
-

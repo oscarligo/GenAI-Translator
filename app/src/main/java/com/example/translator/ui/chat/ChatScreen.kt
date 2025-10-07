@@ -8,9 +8,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.translator.di.AppGraph
 import com.example.translator.ui.components.MessageItem
+import com.example.translator.ui.common.getLanguageOrDefault
+import com.example.translator.ui.common.supportedLanguages
 import kotlinx.coroutines.launch
 
 @Composable
@@ -31,7 +33,11 @@ fun ChatScreen(
             @Suppress("UNCHECKED_CAST")
             return ChatViewModel(
                 AppGraph.getMessagesFlow,
-                AppGraph.addUserMessage
+                AppGraph.addUserMessage,
+                AppGraph.getConversationFlow,
+                AppGraph.setTargetLanguage,
+                AppGraph.translateWithOpenAi,
+                AppGraph.addAssistantMessage
             ) as T
         }
     })
@@ -57,12 +63,33 @@ fun ChatScreen(
         vm.onEvent(ChatContract.Event.PickImage(uri?.toString()))
     }
 
+    var langMenuExpanded by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Chat") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Volver") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver") }
+                },
+                actions = {
+                    val lang = getLanguageOrDefault(state.targetLang)
+                    Box {
+                        AssistChip(onClick = { langMenuExpanded = true }, label = { Text(text = "${lang.flag} ${lang.code.uppercase()}") })
+                        DropdownMenu(expanded = langMenuExpanded, onDismissRequest = { langMenuExpanded = false }) {
+                            supportedLanguages.forEach { l ->
+                                DropdownMenuItem(
+                                    text = { Text("${l.flag} ${l.name} (${l.code.uppercase()})") },
+                                    onClick = {
+                                        langMenuExpanded = false
+                                        if (!l.code.equals(state.targetLang, ignoreCase = true)) {
+                                            vm.onEvent(ChatContract.Event.ChangeTargetLanguage(l.code))
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             )
         }
@@ -83,6 +110,32 @@ fun ChatScreen(
                 }
             }
 
+            // Mostrar resultado estructurado de la traducción
+            state.translationResult?.let { result ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text(text = "Traducción: ${result.translation}", style = MaterialTheme.typography.titleMedium)
+                        if (result.usage.isNotBlank()) {
+                            Spacer(Modifier.height(4.dp))
+                            Text(text = "Uso: ${result.usage}", style = MaterialTheme.typography.bodyMedium)
+                        }
+                        if (result.notes.isNotBlank()) {
+                            Spacer(Modifier.height(4.dp))
+                            Text(text = "Notas: ${result.notes}", style = MaterialTheme.typography.bodySmall)
+                        }
+                        if (result.synonyms.isNotEmpty()) {
+                            Spacer(Modifier.height(4.dp))
+                            Text(text = "Sinónimos: ${result.synonyms.joinToString(", ")}", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+            }
+
             if (state.selectedImageUri != null) {
                 Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     AssistChip(
@@ -91,7 +144,7 @@ fun ChatScreen(
                     )
                     Spacer(Modifier.weight(1f))
                     FilledIconButton(onClick = { vm.onEvent(ChatContract.Event.SendImage) }) {
-                        Icon(Icons.Default.Send, contentDescription = "Enviar imagen")
+                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Enviar imagen")
                     }
                 }
                 Spacer(Modifier.height(8.dp))
@@ -108,10 +161,10 @@ fun ChatScreen(
                     placeholder = { Text("Escribe un mensaje…") }
                 )
                 IconButton(onClick = { pickImageLauncher.launch("image/*") }) {
-                    Icon(Icons.Default.Image, contentDescription = "Elegir imagen")
+                    Icon(Icons.Filled.Image, contentDescription = "Elegir imagen")
                 }
                 IconButton(onClick = { vm.onEvent(ChatContract.Event.SendText) }) {
-                    Icon(Icons.Default.Send, contentDescription = "Enviar texto")
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Enviar texto")
                 }
             }
         }

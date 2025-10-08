@@ -8,6 +8,7 @@ import com.example.translator.domain.usecase.GetConversationFlowUseCase
 import com.example.translator.domain.usecase.SetTargetLanguageUseCase
 import com.example.translator.domain.usecase.TranslateWithOpenAiUseCase
 import com.example.translator.domain.usecase.AddAssistantMessageUseCase
+import com.example.translator.ui.common.getUiLabelsFor
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -80,11 +81,12 @@ class ChatViewModel(
             try {
                 val result = translateWithOpenAi(text, state.value.targetLang)
                 if (result != null) {
+                    val labels = getUiLabelsFor(state.value.targetLang)
                     val formatted = buildString {
-                        appendLine("Traducción: ${result.translation}")
-                        if (result.usage.isNotBlank()) appendLine("Uso: ${result.usage}")
-                        if (result.notes.isNotBlank()) appendLine("Notas: ${result.notes}")
-                        if (result.synonyms.isNotEmpty()) append("Sinónimos: ").append(result.synonyms.joinToString(", "))
+                        appendLine("${labels.translation}: ${result.translation}")
+                        if (result.usage.isNotBlank()) appendLine("${labels.usage}: ${result.usage}")
+                        if (result.notes.isNotBlank()) appendLine("${labels.notes}: ${result.notes}")
+                        if (result.synonyms.isNotEmpty()) append("${labels.synonyms}: ").append(result.synonyms.joinToString(", "))
                     }.trim()
                     addAssistantMessage(convId, formatted)
                     // Actualizar el estado con el resultado estructurado

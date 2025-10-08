@@ -20,6 +20,7 @@ import com.example.translator.di.AppGraph
 import com.example.translator.ui.components.MessageItem
 import com.example.translator.ui.common.getLanguageOrDefault
 import com.example.translator.ui.common.supportedLanguages
+import com.example.translator.ui.common.getUiLabelsFor
 import kotlinx.coroutines.launch
 
 @Composable
@@ -64,6 +65,7 @@ fun ChatScreen(
     }
 
     var langMenuExpanded by remember { mutableStateOf(false) }
+    val labels = getUiLabelsFor(state.targetLang)
 
     Scaffold(
         topBar = {
@@ -119,18 +121,18 @@ fun ChatScreen(
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Column(Modifier.padding(16.dp)) {
-                        Text(text = "Traducción: ${result.translation}", style = MaterialTheme.typography.titleMedium)
+                        Text(text = "${labels.translation}: ${result.translation}", style = MaterialTheme.typography.titleMedium)
                         if (result.usage.isNotBlank()) {
                             Spacer(Modifier.height(4.dp))
-                            Text(text = "Uso: ${result.usage}", style = MaterialTheme.typography.bodyMedium)
+                            Text(text = "${labels.usage}: ${result.usage}", style = MaterialTheme.typography.bodyMedium)
                         }
                         if (result.notes.isNotBlank()) {
                             Spacer(Modifier.height(4.dp))
-                            Text(text = "Notas: ${result.notes}", style = MaterialTheme.typography.bodySmall)
+                            Text(text = "${labels.notes}: ${result.notes}", style = MaterialTheme.typography.bodySmall)
                         }
                         if (result.synonyms.isNotEmpty()) {
                             Spacer(Modifier.height(4.dp))
-                            Text(text = "Sinónimos: ${result.synonyms.joinToString(", ")}", style = MaterialTheme.typography.bodySmall)
+                            Text(text = "${labels.synonyms}: ${result.synonyms.joinToString(", ")}", style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 }
@@ -158,7 +160,7 @@ fun ChatScreen(
                     value = state.inputText,
                     onValueChange = { vm.onEvent(ChatContract.Event.OnInputChange(it)) },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Escribe un mensaje…") }
+                    placeholder = { Text(labels.inputPlaceholder) }
                 )
                 IconButton(onClick = { pickImageLauncher.launch("image/*") }) {
                     Icon(Icons.Filled.Image, contentDescription = "Elegir imagen")

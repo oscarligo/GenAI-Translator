@@ -63,4 +63,17 @@ class InMemoryConversationRepository : ConversationRepository {
             if (c.id == conversationId) c.copy(messageCount = c.messageCount + 1, lastUpdated = System.currentTimeMillis()) else c
         }.sortedByDescending { it.lastUpdated }
     }
+
+    override suspend fun deleteConversation(conversationId: String) {
+        // Remove from list
+        conversationsFlow.value = conversationsFlow.value.filterNot { it.id == conversationId }
+        // Remove messages flow
+        messagesMap.remove(conversationId)
+    }
+
+    override suspend fun renameConversation(conversationId: String, title: String) {
+        conversationsFlow.value = conversationsFlow.value.map { c ->
+            if (c.id == conversationId) c.copy(title = title, lastUpdated = System.currentTimeMillis()) else c
+        }.sortedByDescending { it.lastUpdated }
+    }
 }

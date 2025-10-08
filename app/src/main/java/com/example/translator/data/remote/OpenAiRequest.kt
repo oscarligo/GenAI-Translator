@@ -15,4 +15,3 @@ data class OpenAiRequest(
     @Json(name = "messages") val messages: List<OpenAiMessage>,
     @Json(name = "temperature") val temperature: Double = 0.2
 )
-

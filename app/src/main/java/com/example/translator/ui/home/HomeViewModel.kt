@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.translator.domain.usecase.CreateConversationUseCase
 import com.example.translator.domain.usecase.GetConversationsFlowUseCase
+import com.example.translator.domain.usecase.DeleteConversationUseCase
+import com.example.translator.domain.usecase.RenameConversationUseCase
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +18,9 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val getConversations: GetConversationsFlowUseCase,
-    private val createConversation: CreateConversationUseCase
+    private val createConversation: CreateConversationUseCase,
+    private val deleteConversationUC: DeleteConversationUseCase,
+    private val renameConversationUC: RenameConversationUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeContract.State())
@@ -57,5 +61,13 @@ class HomeViewModel(
     suspend fun createAndReturnId(): String {
         val conv = createConversation()
         return conv.id
+    }
+
+    fun deleteConversation(id: String) {
+        viewModelScope.launch { deleteConversationUC(id) }
+    }
+
+    fun renameConversation(id: String, title: String) {
+        viewModelScope.launch { renameConversationUC(id, title) }
     }
 }

@@ -19,4 +19,8 @@ interface ConversationRepository {
     suspend fun setTargetLanguage(conversationId: String, lang: String)
     // Nuevo: agregar mensaje del asistente
     suspend fun addAssistantMessage(conversationId: String, text: String)
+    // Nuevo: eliminar una conversación
+    suspend fun deleteConversation(conversationId: String)
+    // Nuevo: renombrar una conversación
+    suspend fun renameConversation(conversationId: String, title: String)
 }

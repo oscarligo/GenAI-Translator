@@ -44,7 +44,15 @@ class OpenAiRepository(private val apiKey: String) {
         sourceLang: String = "auto"
     ): TranslationResult? {
         Log.d("OpenAiRepository", "Iniciando traducción: '$phrase' de $sourceLang a $targetLang")
-        val systemPrompt = "Eres un traductor experto. Si sourceLang=auto, detecta automáticamente el idioma de entrada. Traduce la frase o palabra de $sourceLang a $targetLang. Devuelve la traducción exacta, explica si es formal o casual, si no hay traducción directa, cómo se transmite la idea, y da sinónimos y formas similares. Responde en JSON con los campos: translation (string), usage (string), notes (string), synonyms (string[])."
+        val systemPrompt = """
+            Eres un traductor experto. Si sourceLang=auto, detecta automáticamente el idioma de entrada.
+            Traduce la frase o palabra de $sourceLang a $targetLang.
+            Devuelve SOLO un JSON válido (sin markdown, sin comentarios, sin texto adicional), con exactamente estos campos:
+            - translation (string): la traducción exacta, en $targetLang.
+            - usage (string): explicación breve de uso (formal o casual, notas de registro), en $targetLang.
+            - notes (string): si no hay traducción directa, explica cómo se transmite la idea en $targetLang.
+            - synonyms (string[]): 3-8 sinónimos o alternativas en $targetLang.
+        """.trimIndent()
         val messages = listOf(
             OpenAiMessage(role = "system", content = systemPrompt),
             OpenAiMessage(role = "user", content = phrase)
@@ -77,15 +85,21 @@ class OpenAiRepository(private val apiKey: String) {
             Log.w("OpenAiRepository", "JSON es null, no se puede parsear")
             return null
         }
+        val cleaned = json.trim().let { raw ->
+            if (raw.startsWith("```")) {
+                // Remove markdown fences like ```json ... ```
+                raw.removePrefix("```json").removePrefix("```").removeSuffix("```").trim()
+            } else raw
+        }
         return try {
             val moshi = Moshi.Builder()
                 .add(KotlinJsonAdapterFactory())
                 .build()
             val adapter = moshi.adapter(TranslationResult::class.java)
-            adapter.fromJson(json)
+            adapter.fromJson(cleaned)
         } catch (e: Exception) {
             Log.e("OpenAiRepository", "Error al parsear JSON: ${e.message}", e)
-            Log.e("OpenAiRepository", "JSON recibido: $json")
+            Log.e("OpenAiRepository", "JSON recibido: $cleaned")
             null
         }
     }

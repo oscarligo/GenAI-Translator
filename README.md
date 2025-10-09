@@ -11,8 +11,7 @@ aprender y comprender mejor el idioma, especialmente en casos donde no existe un
 GenTranslator adopta una temática de chat interactivo. El usuario puede escribir una palabra o frase y recibir una respuesta 
 enriquecida, similar a una conversación con un tutor lingüístico:
 
-
-![Screenshot 2025-10-08 at 9.13.40 PM.png](../../../../var/folders/zb/k1_zlzbx2ygdvk35hn69pp3c0000gn/T/TemporaryItems/NSIRD_screencaptureui_hAstFF/Screenshot%202025-10-08%20at%209.13.40%E2%80%AFPM.png)
+<img width="628" height="703" alt="Screenshot 2025-10-08 at 9 25 01 PM" src="https://github.com/user-attachments/assets/0d76def7-a666-48f3-86f1-b714da88c901" />
 
 ## Características principales:
 

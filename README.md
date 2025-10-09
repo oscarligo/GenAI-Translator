@@ -13,6 +13,8 @@ enriquecida, similar a una conversación con un tutor lingüístico:
 
 <img width="628" height="703" alt="Screenshot 2025-10-08 at 9 25 01 PM" src="https://github.com/user-attachments/assets/0d76def7-a666-48f3-86f1-b714da88c901" />
 
+Video del funcionamiento: https://youtube.com/shorts/ab7rcf0BCF8?si=97czSBi5vsvpA4RD
+
 ## Características principales:
 
 - Traducción de palabras y frases.
